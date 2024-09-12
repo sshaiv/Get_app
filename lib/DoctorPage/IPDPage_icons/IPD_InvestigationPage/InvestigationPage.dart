@@ -1,4 +1,4 @@
-import 'package:doctor_app/DoctorPage/ICUPage_icons/InvestigationPage/GraphPage.dart';
+import 'package:doctor_app/DoctorPage/ICUPage_icons/ICU_InvestigationPage/GraphPage.dart';
 import 'package:doctor_app/DoctorPage/ICUPage_icons/MedicinePage.dart';
 import 'package:doctor_app/DoctorPage/ICUPage_icons/SummaryPage.dart';
 import 'package:doctor_app/DoctorPage/ICUPage_icons/VitalsPage.dart';
@@ -6,18 +6,18 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 
-class InvestigationPage extends StatefulWidget {
-  const InvestigationPage({super.key});
+class IPD_InvestigationPage extends StatefulWidget {
+  const IPD_InvestigationPage({super.key});
 
   @override
-  InvestigationPageState createState() => InvestigationPageState();
+ IPD_InvestigationPageState createState() => IPD_InvestigationPageState();
 }
 
-class InvestigationPageState extends State<InvestigationPage> {
+class IPD_InvestigationPageState extends State<IPD_InvestigationPage> {
   int _currentIndex = 0;
 
   final List<Widget> _widgetOptions = <Widget>[
-    const InvestigationContent(), // Custom widget to hold the investigation content
+    const InvestigationContent(), 
     VitalsPage(),
     MedicinePage(),
     SummaryPage(),
@@ -69,7 +69,7 @@ class InvestigationContent extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Patient Name',
+        title: const Text('IPD : Patient Name',
             style: TextStyle(fontWeight: FontWeight.bold)),
         backgroundColor: const Color(0xffcdd8dc),
       ),
