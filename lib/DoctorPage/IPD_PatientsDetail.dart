@@ -40,9 +40,6 @@ class IPDPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // appBar: AppBar(
-      //   title: Text('IPD Page'),
-      // ),
       body: FutureBuilder<List<PatientData>>(
         future: fetchPatientData(),
         builder: (context, snapshot) {

@@ -65,6 +65,12 @@ class _LoginpageState extends State<Loginpage> {
             ),
           ),
         );
+        // Clear the text fields
+        _usernameController.clear();
+        _passwordController.clear();
+        setState(() {
+          _selectedLocation = null; // Reset selected location
+        });
 
         if (data['success'] == true) {
           final token = data['token'];

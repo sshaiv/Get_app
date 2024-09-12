@@ -38,6 +38,7 @@ dependencies:
   http: ^1.2.2
   font_awesome_flutter: ^10.7.0
   zego_express_engine: ^3.16.2
+  google_fonts: ^6.2.1
 
 dev_dependencies:
   flutter_test:

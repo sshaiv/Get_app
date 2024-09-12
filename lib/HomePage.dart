@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'DoctorPage/ICU_PatientsDetails.dart';
 import 'DoctorPage/IPD_PatientsDetail.dart';
 import 'DoctorPage/OPD_PatientDetail.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class HomePage extends StatefulWidget {
   final String username;
@@ -32,16 +33,33 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        backgroundColor: const Color.fromARGB(255, 165, 216, 239),
         title: Row(
+          mainAxisAlignment: MainAxisAlignment.end,
           children: [
+            Text("Login : ", style: GoogleFonts.daysOne(
+              fontSize: 10,
+              color: Colors.black,
+            ),),
 
             Text(
               widget.username,
-              style: const TextStyle(fontWeight: FontWeight.bold),
+              style: GoogleFonts.daysOne(
+                fontSize: 18,
+                color: Colors.black,
+              ),
             ),
           ],
         ),
+        leading:
+        IconButton(
+          icon: Icon(Icons.exit_to_app, color: Colors.black),
+          onPressed: () {
+            Navigator.pop(context);
+          },
+        ),
       ),
+      
       body: _widgetOptions.elementAt(_selectedIndex),
       bottomNavigationBar: BottomNavigationBar(
         items: const <BottomNavigationBarItem>[
