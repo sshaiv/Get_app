@@ -17,7 +17,7 @@ class IPD_InvestigationPageState extends State<IPD_InvestigationPage> {
   int _currentIndex = 0;
 
   final List<Widget> _widgetOptions = <Widget>[
-    const InvestigationContent(), 
+    const InvestigationContent(),
     VitalsPage(),
     MedicinePage(),
     SummaryPage(),
@@ -350,5 +350,7 @@ class InvestigationContent extends StatelessWidget {
     );
   }
 }
+
+
 
 

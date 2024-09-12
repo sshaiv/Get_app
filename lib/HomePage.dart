@@ -39,21 +39,21 @@ class _HomePageState extends State<HomePage> {
           children: [
             Text("Login : ", style: GoogleFonts.daysOne(
               fontSize: 10,
-              color: Colors.black,
+              color: Colors.red,
             ),),
 
             Text(
               widget.username,
               style: GoogleFonts.daysOne(
                 fontSize: 18,
-                color: Colors.black,
+                color: Colors.red,
               ),
             ),
           ],
         ),
         leading:
         IconButton(
-          icon: Icon(Icons.exit_to_app, color: Colors.black),
+          icon: const Icon(Icons.exit_to_app, color: Colors.black),
           onPressed: () {
             Navigator.pop(context);
           },

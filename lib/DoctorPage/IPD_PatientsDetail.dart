@@ -92,7 +92,7 @@ class IPDPage extends StatelessWidget {
                                       ),
                                     ),
                                     Text(
-                                      'Visit ID: ${patient.visitId}',
+                                      'IPD ID: ${patient.visitId}',
                                       overflow: TextOverflow.ellipsis,
                                       style: TextStyle(
                                         fontSize: 14,
@@ -134,7 +134,9 @@ class IPDPage extends StatelessWidget {
                                     context,
                                     FontAwesomeIcons.vial,
                                     Colors.blue,
-                                    const IPD_InvestigationPage()),
+                                    const IPD_InvestigationPage(
+
+                                    )),
                                 _buildFontAwesomeIconButton(
                                     context,
                                     FontAwesomeIcons.heartPulse,
@@ -240,3 +242,36 @@ class PatientData {
     );
   }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
