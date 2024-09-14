@@ -39,18 +39,19 @@ class ICUPatientList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<List<PatientData>>(
-      // fetch patient data
+    return FutureBuilder<Map<String, dynamic>>(
       future: fetchPatientData(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return Center(child: CircularProgressIndicator());
         } else if (snapshot.hasError) {
           return Center(child: Text('Error: ${snapshot.error}'));
-        } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+        } else if (!snapshot.hasData || snapshot.data!['Table'] == null || (snapshot.data!['Table'] as List).isEmpty) {
           return Center(child: Text('No data available'));
         } else {
-          final patients = snapshot.data!;
+          final List<dynamic> patientsList = snapshot.data!['Table'] as List<dynamic>;
+          final patients = patientsList.map((patient) => PatientData.fromJson(patient)).toList();
+
           return ListView.builder(
             itemCount: patients.length,
             itemBuilder: (context, index) {
@@ -89,9 +90,18 @@ class ICUPatientList extends StatelessWidget {
                                 ),
                               ),
                               Text(
-                                'ICU ID: ${patient.visitId}', // Adjust according to your data model
+                                'ICU ID: ${patient.visitId}',
                                 overflow: TextOverflow.ellipsis,
-                                style: TextStyle(
+                                style: const TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w500,
+                                  color: Colors.black54,
+                                ),
+                              ),
+                              Text(
+                                'GSS UHID: ${patient.gssuhid}',
+                                overflow: TextOverflow.ellipsis,
+                                style: const TextStyle(
                                   fontSize: 14,
                                   fontWeight: FontWeight.w500,
                                   color: Colors.black54,
@@ -102,18 +112,12 @@ class ICUPatientList extends StatelessWidget {
                                 scrollDirection: Axis.horizontal,
                                 child: Row(
                                   children: [
-                                    _buildIconButton(
-                                        context, Icons.add, Colors.red, AddPage()),
-                                    _buildFontAwesomeIconButton(
-                                        context, FontAwesomeIcons.vial, Colors.blue, InvestigationPage(visitId: patient.visitId)),
-                                    _buildFontAwesomeIconButton(
-                                        context, FontAwesomeIcons.heartPulse, Colors.red, VitalsPage()),
-                                    _buildFontAwesomeIconButton(
-                                        context, FontAwesomeIcons.pills, Colors.blue, MedicinePage()),
-                                    _buildIconButton(
-                                        context, Icons.description, Colors.red, SummaryPage()),
-                                    _buildIconButton(
-                                        context, Icons.settings, Colors.grey, SettingsPage()),
+                                    _buildIconButton(context, Icons.add, Colors.red, AddPage()),
+                                    _buildFontAwesomeIconButton(context, FontAwesomeIcons.vial, Colors.blue, InvestigationPage(visitId: patient.visitId)),
+                                    _buildFontAwesomeIconButton(context, FontAwesomeIcons.heartPulse, Colors.red, VitalsPage()),
+                                    _buildFontAwesomeIconButton(context, FontAwesomeIcons.pills, Colors.blue, MedicinePage()),
+                                    _buildIconButton(context, Icons.description, Colors.red, SummaryPage()),
+                                    _buildIconButton(context, Icons.settings, Colors.grey, SettingsPage()),
                                   ],
                                 ),
                               ),
@@ -173,35 +177,46 @@ class ICUPatientList extends StatelessWidget {
       ),
     );
   }
+}
 
-  Future<List<PatientData>> fetchPatientData() async {
-    final response = await http.get(Uri.parse(
-        'https://doctorapi.medonext.com//api/DoctorAPI/GetData?JsonAppInbox={%22doctorid%22:%2224%22,%22fromdate%22:%22%22,%22todate%22:%22%22,%22datafor%22:%22ICU%22,%22gCookieSessionOrgID%22:%2248%22,%22gCookieSessionDBId%22:%22gdnew%22}'
-    ));
 
-    if (response.statusCode == 200) {
-      final Map<String, dynamic> data = json.decode(json.decode(response.body));
-      final List<dynamic> patientsList = data['Table'] as List<dynamic>;
-      return patientsList.map((patient) => PatientData.fromJson(patient)).toList();
-    } else {
-      throw Exception('Failed to load patient data');
-    }
+Future<Map<String, dynamic>> fetchPatientData() async {
+  final url = 'https://doctorapi.medonext.com/api/DoctorAPI/GetData?JsonAppInbox=${Uri.encodeComponent(json.encode({
+    "doctorid": "24",
+    "fromdate": "",
+    "todate": "",
+    "datafor": "ICU",
+    "gCookieSessionOrgID": "48",
+    "gCookieSessionDBId": "gdnew",
+  }))}';
+
+  final response = await http.get(Uri.parse(url));
+
+  if (response.statusCode == 200) {
+    return json.decode(json.decode(response.body));
+  } else {
+    throw Exception('Failed to load patient data');
   }
 }
+
 
 class PatientData {
   final String name;
   final String visitId;
+  final String gssuhid;
 
   PatientData({
     required this.name,
     required this.visitId,
+    required this.gssuhid,
   });
 
   factory PatientData.fromJson(Map<String, dynamic> json) {
     return PatientData(
       name: json['patname'] ?? 'Unknown',
       visitId: json['visitid'] ?? '',
+      gssuhid: json['gssuhid']?.toString() ?? '',
     );
   }
 }
+

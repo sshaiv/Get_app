@@ -106,7 +106,11 @@ class InvestigationContent extends StatelessWidget {
       "gCookieSessionOrgID": "48",
       "gCookieSessionDBId": "gdnew",
       "AcName": "IPD",
-      "visitid": visitId
+      "visitid": visitId,
+      "gssuhid":"1600",
+      "invid":"785",
+      "servid":"0",
+      "status":"FillResultDtl"
     }))}';
 
     final response = await http.get(Uri.parse(url));
