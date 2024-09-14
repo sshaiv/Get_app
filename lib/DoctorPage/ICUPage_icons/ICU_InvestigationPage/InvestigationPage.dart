@@ -92,33 +92,6 @@ class InvestigationPageState extends State<InvestigationPage> {
   }
 }
 
-
-
-
-// class InvestigationContent extends StatelessWidget {
-//   final String visitId;
-//
-//   const InvestigationContent({super.key, required this.visitId});
-//
-//   @override
-//   Widget build(BuildContext context) {
-//     return Scaffold(
-//       appBar: AppBar(
-//         title: Text('ICU_Patient:$visitId', // Display visitId in the title
-//             style: TextStyle(fontWeight: FontWeight.bold,fontSize: 14)),
-//         backgroundColor: const Color(0xffcdd8dc),
-//       ),
-//       body: Center(
-//         child: Text("Investigation Content will be displayed here"),
-//       ),
-//     );
-//   }
-// }
-
-
-
-
-
 class InvestigationContent extends StatelessWidget {
   final String visitId;
 
@@ -167,26 +140,46 @@ class InvestigationContent extends StatelessWidget {
           final data = snapshot.data!;
           List<dynamic> items = data['Table'] ?? [];
 
+
           return ListView.builder(
             itemCount: items.length,
             itemBuilder: (context, index) {
               final item = items[index];
-              return ListTile(
-                title: Text(item['servname'] ?? 'No name'),
-                subtitle: Text('Order Date: ${item['orddate'] ?? 'No date'}'),
-                trailing: IconButton(
-                  icon: Icon(Icons.picture_as_pdf),
-                  onPressed: () {
-
-                    final pdfUrl = item['pdfpath'];
-                    if (pdfUrl != null && pdfUrl.isNotEmpty) {
-
-                    }
-                  },
+              return Card(
+                margin: EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+                elevation: 4,
+                child: ListTile(
+                  contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  title: Text(
+                    item['servname'] ?? 'No name',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                      color: Color.fromARGB(255, 2, 66, 130),
+                    ),
+                  ),
+                  subtitle: Text(
+                    'Order Date: ${item['orddate'] ?? 'No date'}',
+                    style: TextStyle(
+                      color: Colors.grey[600],
+                      fontSize: 14,
+                    ),
+                  ),
+                  trailing: IconButton(
+                    icon: Icon(Icons.picture_as_pdf),
+                    color: Colors.red,
+                    onPressed: () {
+                      final pdfUrl = item['pdfpath'];
+                      if (pdfUrl != null && pdfUrl.isNotEmpty) {
+                        // Handle PDF URL action here
+                      }
+                    },
+                  ),
                 ),
               );
             },
           );
+
         },
       ),
     );

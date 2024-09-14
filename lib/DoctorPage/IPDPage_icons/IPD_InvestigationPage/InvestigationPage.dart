@@ -1,42 +1,50 @@
-import 'package:doctor_app/DoctorPage/ICUPage_icons/ICU_InvestigationPage/GraphPage.dart';
-import 'package:doctor_app/DoctorPage/ICUPage_icons/MedicinePage.dart';
-import 'package:doctor_app/DoctorPage/ICUPage_icons/SummaryPage.dart';
-import 'package:doctor_app/DoctorPage/ICUPage_icons/VitalsPage.dart';
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:http/http.dart' as http;
+import '../MedicinePage.dart';
+import '../SummaryPage.dart';
+import '../VitalsPage.dart';
 
 
 class IPD_InvestigationPage extends StatefulWidget {
-  const IPD_InvestigationPage({super.key});
+  final String visitId;
+
+  const IPD_InvestigationPage({super.key, required this.visitId});
 
   @override
- IPD_InvestigationPageState createState() => IPD_InvestigationPageState();
+  IPD_InvestigationPageState createState() => IPD_InvestigationPageState();
 }
 
 class IPD_InvestigationPageState extends State<IPD_InvestigationPage> {
   int _currentIndex = 0;
+  late Future<Map<String, dynamic>> _investigationDetails;
 
-  final List<Widget> _widgetOptions = <Widget>[
-    const InvestigationContent(),
-    VitalsPage(),
-    MedicinePage(),
-    SummaryPage(),
-  ];
-
-  void onTabTapped(int index) {
-    setState(() {
-      _currentIndex = index;
-    });
+  @override
+  void initState() {
+    super.initState();
+    _investigationDetails = fetchInvestigationDetails(widget.visitId);
   }
 
   @override
   Widget build(BuildContext context) {
+    final List<Widget> _widgetOptions = <Widget>[
+      IPD_InvestigationContent(visitId: widget.visitId),
+      IPD_VitalsPage(),
+      IPD_MedicinePage(),
+      IPD_SummaryPage(),
+    ];
+
     return Scaffold(
       body: _widgetOptions.elementAt(_currentIndex),
       bottomNavigationBar: BottomNavigationBar(
         type: BottomNavigationBarType.fixed,
         currentIndex: _currentIndex,
-        onTap: onTabTapped,
+        onTap: (index) {
+          setState(() {
+            _currentIndex = index;
+          });
+        },
         items: const [
           BottomNavigationBarItem(
             icon: FaIcon(FontAwesomeIcons.vial),
@@ -60,297 +68,167 @@ class IPD_InvestigationPageState extends State<IPD_InvestigationPage> {
       ),
     );
   }
+
+  Future<Map<String, dynamic>> fetchInvestigationDetails(String visitId) async {
+    final url = 'https://doctorapi.medonext.com/api/DoctorAPI/GetData?JsonAppInbox=${Uri.encodeComponent(json.encode({
+      "doctorid": "24",
+      "fromdate": "",
+      "todate": "",
+      "datafor": "INV",
+      "gCookieSessionOrgID": "48",
+      "gCookieSessionDBId": "gdnew",
+      "AcName": "IPD",
+      "visitid": visitId
+    }))}';
+
+    final response = await http.get(Uri.parse(url));
+
+    if (response.statusCode == 200) {
+      return json.decode(response.body);
+    } else {
+      throw Exception('Failed to load investigation details');
+    }
+  }
 }
 
-class InvestigationContent extends StatelessWidget {
-  const InvestigationContent({super.key});
+class IPD_InvestigationContent extends StatelessWidget {
+  final String visitId;
+
+  const IPD_InvestigationContent({super.key, required this.visitId});
+
+  Future<Map<String, dynamic>> fetchInvestigationDetails(String visitId) async {
+    final url = 'https://doctorapi.medonext.com/api/DoctorAPI/GetData?JsonAppInbox=${Uri.encodeComponent(json.encode({
+      "doctorid": "24",
+      "fromdate": "",
+      "todate": "",
+      "datafor": "INV",
+      "gCookieSessionOrgID": "48",
+      "gCookieSessionDBId": "gdnew",
+      "AcName": "IPD",
+      "visitid": visitId
+    }))}';
+
+    final response = await http.get(Uri.parse(url));
+
+    if (response.statusCode == 200) {
+      return json.decode(json.decode(response.body));
+    } else {
+      throw Exception('Failed to load investigation details');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('IPD : Patient Name',
-            style: TextStyle(fontWeight: FontWeight.bold)),
+        title: Text('IPD_Patient: $visitId',
+            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
         backgroundColor: const Color(0xffcdd8dc),
       ),
-      body: SingleChildScrollView(
-        child: Column(
-          children: [
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Container(
-                    height: 50,
-                    width: 125,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(20),
-                      color: Colors.grey[300],
-                    ),
-                    child: const Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: [
-                        Icon(Icons.calendar_month),
-                        Text(
-                          '05/08/2024',
-                          style: TextStyle(
-                              fontWeight: FontWeight.bold, fontSize: 15),
-                        ),
-                      ],
+      body: FutureBuilder<Map<String, dynamic>>(
+        future: fetchInvestigationDetails(visitId),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return Center(child: CircularProgressIndicator());
+          } else if (snapshot.hasError) {
+            return Center(child: Text('Error: ${snapshot.error}'));
+          } else if (!snapshot.hasData || snapshot.data == null) {
+            return Center(child: Text('No data available'));
+          }
+
+
+          final data = snapshot.data!;
+          List<dynamic> items = data['Table'] ?? [];
+
+
+          return ListView.builder(
+            itemCount: items.length,
+            itemBuilder: (context, index) {
+              final item = items[index];
+              return Card(
+                margin: EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+                elevation: 4,
+                child: ListTile(
+                  contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  title: Text(
+                    item['servname'] ?? 'No name',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                      color: Color.fromARGB(255, 2, 66, 130),
                     ),
                   ),
-                  InkWell(
-                    onTap: () {
-                      print('order clicked');
+                  subtitle: Text(
+                    'Order Date: ${item['orddate'] ?? 'No date'}',
+                    style: TextStyle(
+                      color: Colors.grey[600],
+                      fontSize: 14,
+                    ),
+                  ),
+                  trailing: IconButton(
+                    icon: Icon(Icons.picture_as_pdf),
+                    color: Colors.red,
+                    onPressed: () {
+                      final pdfUrl = item['pdfpath'];
+                      if (pdfUrl != null && pdfUrl.isNotEmpty) {
+                        // Handle PDF URL action here
+                      }
                     },
-                    child: Container(
-                      height: 50,
-                      width: 100,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(50),
-                        color: const Color(0xff89aec3),
-                      ),
-                      child: const Center(
-                        child: Text(
-                          'Order',
-                          style: TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.w500,
-                              color: Colors.white),
-                          textAlign: TextAlign.center,
-                        ),
-                      ),
-                    ),
                   ),
-                ],
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(10.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Expanded(
-                    child: InkWell(
-                      onTap: () {
-                        // Define the action when the container is tapped
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (context) => GraphPage()),
-                        );
-                      },
-                      child: Container(
-                        height: 100,
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(15),
-                          color: const Color(0xfff4f1f1),
-                        ),
-                        child: const Padding(
-                          padding: EdgeInsets.all(8.0),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Text(
-                                'CBC',
-                                style: TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.black),
-                              ),
-                              Text(
-                                '23-07-2023',
-                                style: TextStyle(
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.black54),
-                              ),
-                              Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Text(
-                                    '09:30 AM ',
-                                    style: TextStyle(
-                                        fontSize: 14,
-                                        fontWeight: FontWeight.bold,
-                                        color: Colors.black54),
-                                  ),
-                                  Icon(
-                                    Icons.circle,
-                                    color: Colors.red,
-                                    size: 20,
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: InkWell(
-                      onTap: () {
-                        // Define the action when the container is tapped
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (context) => GraphPage()),
-                        );
-                      },
-                      child: Container(
-                        height: 100,
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(15),
-                          color: const Color(0xfff4f1f1),
-                        ),
-                        child: const Padding(
-                          padding: EdgeInsets.all(8.0),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Text(
-                                'Blood Culture',
-                                style: TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.black),
-                              ),
-                              Text(
-                                '23-07-2023',
-                                style: TextStyle(
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.black54),
-                              ),
-                              Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Text(
-                                    '09:30 AM ',
-                                    style: TextStyle(
-                                        fontSize: 14,
-                                        fontWeight: FontWeight.bold,
-                                        color: Colors.black54),
-                                  ),
-                                  Icon(
-                                    Icons.circle,
-                                    color: Colors.green,
-                                    size: 20,
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                ],
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(10.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Expanded(
-                    child: InkWell(
-                      onTap: () {
-                        // Define the action when the container is tapped
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (context) => GraphPage()),
-                        );
-                      },
-                      child: Container(
-                        height: 100,
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(15),
-                          color: const Color(0xfff4f1f1),
-                        ),
-                        child: const Padding(
-                          padding: EdgeInsets.all(8.0),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Text(
-                                'Electrolyte',
-                                style: TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.black),
-                              ),
-                              Text(
-                                '23-07-2023',
-                                style: TextStyle(
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.black54),
-                              ),
-                              Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Text(
-                                    '09:30 AM ',
-                                    style: TextStyle(
-                                        fontSize: 14,
-                                        fontWeight: FontWeight.bold,
-                                        color: Colors.black54),
-                                  ),
-                                  Icon(
-                                    Icons.circle,
-                                    color: Colors.yellow,
-                                    size: 20,
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: InkWell(
-                      onTap: () {
-                        // Define the action when the container is tapped
-                        // Navigator.push(
-                        //   context,
-                        //   MaterialPageRoute(builder: (context) => GraphPage()),
-                        // );
-                      },
-                      child: Container(
-                        height: 100,
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(15),
-                          color: const Color(0xfff4f1f1),
-                        ),
-                        child: const Padding(
-                          padding: EdgeInsets.all(8.0),
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                ],
-              ),
-            ),
-          ],
-        ),
+
+
+                  // trailing: IconButton(
+                  //   icon: Icon(Icons.picture_as_pdf),
+                  //   color: Colors.red,
+                  //   onPressed: () {
+                  //     final pdfUrl = item['pdfpath'];
+                  //     if (pdfUrl != null && pdfUrl.isNotEmpty) {
+                  //       String servname = item['servname'] ?? '';
+                  //       if (servname.contains('Lipid Profile')) {
+                  //         // Navigate to PDF Viewer for Lipid Profile
+                  //         Navigator.push(
+                  //           context,
+                  //           MaterialPageRoute(builder: (context) => PdfViewerPage(pdfUrl: pdfUrl)),
+                  //         );
+                  //       } else if (servname.contains('CBC')) {
+                  //         // Navigate to PDF Viewer for CBC
+                  //         Navigator.push(
+                  //           context,
+                  //           MaterialPageRoute(builder: (context) => PdfViewerPage(pdfUrl: pdfUrl)),
+                  //         );
+                  //       } else if (servname.contains('TSH')) {
+                  //         // Navigate to PDF Viewer for TSH
+                  //         Navigator.push(
+                  //           context,
+                  //           MaterialPageRoute(builder: (context) => PdfViewerPage(pdfUrl: pdfUrl)),
+                  //         );
+                  //       } else {
+                  //         // Default action for other PDFs
+                  //         Navigator.push(
+                  //           context,
+                  //           MaterialPageRoute(builder: (context) => PdfViewerPage(pdfUrl: pdfUrl)),
+                  //         );
+                  //       }
+                  //     } else {
+                  //       // Handle case where pdfUrl is null or empty
+                  //       ScaffoldMessenger.of(context).showSnackBar(
+                  //         SnackBar(content: Text('No PDF available for this item.')),
+                  //       );
+                  //     }
+                  //   },
+                  // ),
+
+
+                ),
+              );
+            },
+          );
+
+        },
       ),
     );
   }
 }
-
 
 
 

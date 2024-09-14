@@ -69,7 +69,7 @@ class _LoginpageState extends State<Loginpage> {
         _usernameController.clear();
         _passwordController.clear();
         setState(() {
-          _selectedLocation = null; // Reset selected location
+          _selectedLocation = null; 
         });
 
         if (data['success'] == true) {
