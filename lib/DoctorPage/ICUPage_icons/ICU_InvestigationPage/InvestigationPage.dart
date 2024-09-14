@@ -7,11 +7,11 @@ import '../SummaryPage.dart';
 import '../VitalsPage.dart';
 import 'GraphPage.dart';
 
-
 class InvestigationPage extends StatefulWidget {
   final String visitId;
+  final String gssuhid;
 
-  const InvestigationPage({super.key, required this.visitId});
+  const InvestigationPage({super.key, required this.visitId, required this.gssuhid});
 
   @override
   InvestigationPageState createState() => InvestigationPageState();
@@ -24,13 +24,38 @@ class InvestigationPageState extends State<InvestigationPage> {
   @override
   void initState() {
     super.initState();
-    _investigationDetails = fetchInvestigationDetails(widget.visitId);
+    _investigationDetails = fetchInvestigationDetails(widget.visitId, widget.gssuhid);
+  }
+
+  Future<Map<String, dynamic>> fetchInvestigationDetails(String visitId, String gssuhid) async {
+    final url = 'https://doctorapi.medonext.com/api/DoctorAPI/GetData?JsonAppInbox=${Uri.encodeComponent(json.encode({
+      "doctorid": "24",
+      "fromdate": "",
+      "todate": "",
+      "datafor": "INV",
+      "gCookieSessionOrgID": "48",
+      "gCookieSessionDBId": "gdnew",
+      "AcName": "IPD",
+      "visitid": visitId,
+      "gssuhid": gssuhid,
+      "invid": "785",  // Include these if required
+      "servid": "0",
+      "status": "FillResultDtl"
+    }))}';
+
+    final response = await http.get(Uri.parse(url));
+
+    if (response.statusCode == 200) {
+      return json.decode(response.body);
+    } else {
+      throw Exception('Failed to load investigation details');
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     final List<Widget> _widgetOptions = <Widget>[
-      InvestigationContent(visitId: widget.visitId),
+      InvestigationContent(visitId: widget.visitId, gssuhid: widget.gssuhid),
       VitalsPage(),
       MedicinePage(),
       SummaryPage(),
@@ -69,35 +94,15 @@ class InvestigationPageState extends State<InvestigationPage> {
       ),
     );
   }
-
-  Future<Map<String, dynamic>> fetchInvestigationDetails(String visitId) async {
-    final url = 'https://doctorapi.medonext.com/api/DoctorAPI/GetData?JsonAppInbox=${Uri.encodeComponent(json.encode({
-      "doctorid": "24",
-      "fromdate": "",
-      "todate": "",
-      "datafor": "INV",
-      "gCookieSessionOrgID": "48",
-      "gCookieSessionDBId": "gdnew",
-      "AcName": "IPD",
-      "visitid": visitId
-    }))}';
-
-    final response = await http.get(Uri.parse(url));
-
-    if (response.statusCode == 200) {
-      return json.decode(response.body);
-    } else {
-      throw Exception('Failed to load investigation details');
-    }
-  }
 }
 
 class InvestigationContent extends StatelessWidget {
   final String visitId;
+  final String gssuhid;
 
-  const InvestigationContent({super.key, required this.visitId});
+  const InvestigationContent({super.key, required this.visitId, required this.gssuhid});
 
-  Future<Map<String, dynamic>> fetchInvestigationDetails(String visitId) async {
+  Future<Map<String, dynamic>> fetchInvestigationDetails(String visitId, String gssuhid) async {
     final url = 'https://doctorapi.medonext.com/api/DoctorAPI/GetData?JsonAppInbox=${Uri.encodeComponent(json.encode({
       "doctorid": "24",
       "fromdate": "",
@@ -107,16 +112,16 @@ class InvestigationContent extends StatelessWidget {
       "gCookieSessionDBId": "gdnew",
       "AcName": "IPD",
       "visitid": visitId,
-      "gssuhid":"1600",
-      "invid":"785",
-      "servid":"0",
-      "status":"FillResultDtl"
+      "gssuhid": gssuhid,
+      "invid": "785",
+      "servid": "0",
+      "status": "FillResultDtl"
     }))}';
 
     final response = await http.get(Uri.parse(url));
 
     if (response.statusCode == 200) {
-      return json.decode(json.decode(response.body));
+      return json.decode(json.decode(response.body)); // Assuming the response is already decoded
     } else {
       throw Exception('Failed to load investigation details');
     }
@@ -126,12 +131,12 @@ class InvestigationContent extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('ICU_Patient: $visitId',
+        title: Text('ICU Patient: $visitId , UHID: $gssuhid',
             style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
         backgroundColor: const Color(0xffcdd8dc),
       ),
       body: FutureBuilder<Map<String, dynamic>>(
-        future: fetchInvestigationDetails(visitId),
+        future: fetchInvestigationDetails(visitId, gssuhid),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return Center(child: CircularProgressIndicator());
@@ -143,7 +148,6 @@ class InvestigationContent extends StatelessWidget {
 
           final data = snapshot.data!;
           List<dynamic> items = data['Table'] ?? [];
-
 
           return ListView.builder(
             itemCount: items.length,
@@ -175,7 +179,9 @@ class InvestigationContent extends StatelessWidget {
                     onPressed: () {
                       final pdfUrl = item['pdfpath'];
                       if (pdfUrl != null && pdfUrl.isNotEmpty) {
-                        // Handle PDF URL action here
+                        // Implement PDF URL action here
+                        // For example, you could use the `url_launcher` package to open the PDF
+                        // launch(pdfUrl);
                       }
                     },
                   ),
@@ -183,9 +189,12 @@ class InvestigationContent extends StatelessWidget {
               );
             },
           );
-
         },
       ),
     );
   }
 }
+
+
+
+

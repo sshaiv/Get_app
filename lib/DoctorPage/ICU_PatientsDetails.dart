@@ -98,22 +98,24 @@ class ICUPatientList extends StatelessWidget {
                                   color: Colors.black54,
                                 ),
                               ),
-                              Text(
-                                'GSS UHID: ${patient.gssuhid}',
-                                overflow: TextOverflow.ellipsis,
-                                style: const TextStyle(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w500,
-                                  color: Colors.black54,
-                                ),
-                              ),
+
+                              // Text(
+                              //   'GSS UHID: ${patient.gssuhid}',
+                              //   overflow: TextOverflow.ellipsis,
+                              //   style: const TextStyle(
+                              //     fontSize: 14,
+                              //     fontWeight: FontWeight.w500,
+                              //     color: Colors.black54,
+                              //   ),
+                              // ),
+
                               const SizedBox(height: 4),
                               SingleChildScrollView(
                                 scrollDirection: Axis.horizontal,
                                 child: Row(
                                   children: [
                                     _buildIconButton(context, Icons.add, Colors.red, AddPage()),
-                                    _buildFontAwesomeIconButton(context, FontAwesomeIcons.vial, Colors.blue, InvestigationPage(visitId: patient.visitId)),
+                                    _buildFontAwesomeIconButton(context, FontAwesomeIcons.vial, Colors.blue, InvestigationPage(visitId: patient.visitId, gssuhid:patient.gssuhid)),
                                     _buildFontAwesomeIconButton(context, FontAwesomeIcons.heartPulse, Colors.red, VitalsPage()),
                                     _buildFontAwesomeIconButton(context, FontAwesomeIcons.pills, Colors.blue, MedicinePage()),
                                     _buildIconButton(context, Icons.description, Colors.red, SummaryPage()),
