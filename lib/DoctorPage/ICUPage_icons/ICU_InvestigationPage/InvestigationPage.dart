@@ -5,13 +5,12 @@ import 'package:http/http.dart' as http;
 import '../MedicinePage.dart';
 import '../SummaryPage.dart';
 import '../VitalsPage.dart';
-import 'GraphPage.dart';
+
 
 class InvestigationPage extends StatefulWidget {
   final String visitId;
-  final String gssuhid;
 
-  const InvestigationPage({super.key, required this.visitId, required this.gssuhid});
+  const InvestigationPage({super.key, required this.visitId, required String gssuhid});
 
   @override
   InvestigationPageState createState() => InvestigationPageState();
@@ -24,29 +23,25 @@ class InvestigationPageState extends State<InvestigationPage> {
   @override
   void initState() {
     super.initState();
-    _investigationDetails = fetchInvestigationDetails(widget.visitId, widget.gssuhid);
+    _investigationDetails = fetchInvestigationDetails(widget.visitId);
   }
 
-  Future<Map<String, dynamic>> fetchInvestigationDetails(String visitId, String gssuhid) async {
+  Future<Map<String, dynamic>> fetchInvestigationDetails(String visitId) async {
     final url = 'https://doctorapi.medonext.com/api/DoctorAPI/GetData?JsonAppInbox=${Uri.encodeComponent(json.encode({
-      "doctorid": "24",
+      "doctorid": "",
       "fromdate": "",
       "todate": "",
       "datafor": "INV",
       "gCookieSessionOrgID": "48",
       "gCookieSessionDBId": "gdnew",
       "AcName": "IPD",
-      "visitid": visitId,
-      "gssuhid": gssuhid,
-      "invid": "785",  // Include these if required
-      "servid": "0",
-      "status": "FillResultDtl"
+      "visitid": visitId
     }))}';
 
     final response = await http.get(Uri.parse(url));
 
     if (response.statusCode == 200) {
-      return json.decode(response.body);
+      return json.decode(json.decode(response.body));
     } else {
       throw Exception('Failed to load investigation details');
     }
@@ -55,7 +50,7 @@ class InvestigationPageState extends State<InvestigationPage> {
   @override
   Widget build(BuildContext context) {
     final List<Widget> _widgetOptions = <Widget>[
-      InvestigationContent(visitId: widget.visitId, gssuhid: widget.gssuhid),
+      InvestigationContent(visitId: widget.visitId),
       VitalsPage(),
       MedicinePage(),
       SummaryPage(),
@@ -98,30 +93,25 @@ class InvestigationPageState extends State<InvestigationPage> {
 
 class InvestigationContent extends StatelessWidget {
   final String visitId;
-  final String gssuhid;
 
-  const InvestigationContent({super.key, required this.visitId, required this.gssuhid});
+  const InvestigationContent({super.key, required this.visitId});
 
-  Future<Map<String, dynamic>> fetchInvestigationDetails(String visitId, String gssuhid) async {
+  Future<Map<String, dynamic>> fetchInvestigationDetails(String visitId) async {
     final url = 'https://doctorapi.medonext.com/api/DoctorAPI/GetData?JsonAppInbox=${Uri.encodeComponent(json.encode({
-      "doctorid": "24",
+      "doctorid": "",
       "fromdate": "",
       "todate": "",
       "datafor": "INV",
       "gCookieSessionOrgID": "48",
       "gCookieSessionDBId": "gdnew",
       "AcName": "IPD",
-      "visitid": visitId,
-      "gssuhid": gssuhid,
-      "invid": "785",
-      "servid": "0",
-      "status": "FillResultDtl"
+      "visitid": visitId
     }))}';
 
     final response = await http.get(Uri.parse(url));
 
     if (response.statusCode == 200) {
-      return json.decode(json.decode(response.body)); // Assuming the response is already decoded
+      return json.decode(json.decode(response.body));
     } else {
       throw Exception('Failed to load investigation details');
     }
@@ -131,12 +121,14 @@ class InvestigationContent extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('ICU Patient: $visitId , UHID: $gssuhid',
-            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
-        backgroundColor: const Color(0xffcdd8dc),
+        title: Text(
+          'ICU Patient: $visitId',
+          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+        ),
+        backgroundColor: Colors.blueGrey[100],
       ),
       body: FutureBuilder<Map<String, dynamic>>(
-        future: fetchInvestigationDetails(visitId, gssuhid),
+        future: fetchInvestigationDetails(visitId),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return Center(child: CircularProgressIndicator());
@@ -150,37 +142,39 @@ class InvestigationContent extends StatelessWidget {
           List<dynamic> items = data['Table'] ?? [];
 
           return ListView.builder(
+            padding: EdgeInsets.symmetric(vertical: 10, horizontal: 15),
             itemCount: items.length,
             itemBuilder: (context, index) {
               final item = items[index];
               return Card(
-                margin: EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+                margin: EdgeInsets.symmetric(vertical: 8),
                 elevation: 4,
                 child: ListTile(
-                  contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  contentPadding: EdgeInsets.all(16),
                   title: Text(
                     item['servname'] ?? 'No name',
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 16,
-                      color: Color.fromARGB(255, 2, 66, 130),
                     ),
                   ),
                   subtitle: Text(
                     'Order Date: ${item['orddate'] ?? 'No date'}',
                     style: TextStyle(
-                      color: Colors.grey[600],
+                      color: Colors.grey[700],
                       fontSize: 14,
                     ),
                   ),
                   trailing: IconButton(
-                    icon: Icon(Icons.picture_as_pdf),
-                    color: Colors.red,
+                    icon: Icon(
+                      Icons.picture_as_pdf,
+                      color: Colors.red,
+                    ),
                     onPressed: () {
                       final pdfUrl = item['pdfpath'];
                       if (pdfUrl != null && pdfUrl.isNotEmpty) {
                         // Implement PDF URL action here
-                        // For example, you could use the `url_launcher` package to open the PDF
+                        // For example, use the `url_launcher` package to open the PDF
                         // launch(pdfUrl);
                       }
                     },

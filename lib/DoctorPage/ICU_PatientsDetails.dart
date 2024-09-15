@@ -31,7 +31,6 @@ class ICUPage extends StatelessWidget {
   }
 }
 
-
 class ICUPatientList extends StatelessWidget {
   final String username;
 
@@ -98,7 +97,7 @@ class ICUPatientList extends StatelessWidget {
                                   color: Colors.black54,
                                 ),
                               ),
-
+                              // Pass the gssuhid to the relevant page if needed
                               // Text(
                               //   'GSS UHID: ${patient.gssuhid}',
                               //   overflow: TextOverflow.ellipsis,
@@ -108,14 +107,13 @@ class ICUPatientList extends StatelessWidget {
                               //     color: Colors.black54,
                               //   ),
                               // ),
-
                               const SizedBox(height: 4),
                               SingleChildScrollView(
                                 scrollDirection: Axis.horizontal,
                                 child: Row(
                                   children: [
                                     _buildIconButton(context, Icons.add, Colors.red, AddPage()),
-                                    _buildFontAwesomeIconButton(context, FontAwesomeIcons.vial, Colors.blue, InvestigationPage(visitId: patient.visitId, gssuhid:patient.gssuhid)),
+                                    _buildFontAwesomeIconButton(context, FontAwesomeIcons.vial, Colors.blue, InvestigationPage(visitId: patient.visitId, gssuhid: patient.gssuhid)),
                                     _buildFontAwesomeIconButton(context, FontAwesomeIcons.heartPulse, Colors.red, VitalsPage()),
                                     _buildFontAwesomeIconButton(context, FontAwesomeIcons.pills, Colors.blue, MedicinePage()),
                                     _buildIconButton(context, Icons.description, Colors.red, SummaryPage()),
@@ -181,7 +179,6 @@ class ICUPatientList extends StatelessWidget {
   }
 }
 
-
 Future<Map<String, dynamic>> fetchPatientData() async {
   final url = 'https://doctorapi.medonext.com/api/DoctorAPI/GetData?JsonAppInbox=${Uri.encodeComponent(json.encode({
     "doctorid": "24",
@@ -195,12 +192,11 @@ Future<Map<String, dynamic>> fetchPatientData() async {
   final response = await http.get(Uri.parse(url));
 
   if (response.statusCode == 200) {
-    return json.decode(json.decode(response.body));
+    return json.decode(json.decode(response.body)) as Map<String, dynamic>;
   } else {
     throw Exception('Failed to load patient data');
   }
 }
-
 
 class PatientData {
   final String name;
@@ -221,4 +217,3 @@ class PatientData {
     );
   }
 }
-

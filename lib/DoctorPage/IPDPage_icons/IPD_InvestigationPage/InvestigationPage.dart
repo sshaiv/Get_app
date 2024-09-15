@@ -71,14 +71,15 @@ class IPD_InvestigationPageState extends State<IPD_InvestigationPage> {
 
   Future<Map<String, dynamic>> fetchInvestigationDetails(String visitId) async {
     final url = 'https://doctorapi.medonext.com/api/DoctorAPI/GetData?JsonAppInbox=${Uri.encodeComponent(json.encode({
-      "doctorid": "24",
+      "doctorid": "",
       "fromdate": "",
       "todate": "",
       "datafor": "INV",
       "gCookieSessionOrgID": "48",
       "gCookieSessionDBId": "gdnew",
       "AcName": "IPD",
-      "visitid": visitId
+      "visitid": visitId,
+
     }))}';
 
     final response = await http.get(Uri.parse(url));
@@ -98,7 +99,7 @@ class IPD_InvestigationContent extends StatelessWidget {
 
   Future<Map<String, dynamic>> fetchInvestigationDetails(String visitId) async {
     final url = 'https://doctorapi.medonext.com/api/DoctorAPI/GetData?JsonAppInbox=${Uri.encodeComponent(json.encode({
-      "doctorid": "24",
+      "doctorid": "",
       "fromdate": "",
       "todate": "",
       "datafor": "INV",
@@ -111,7 +112,7 @@ class IPD_InvestigationContent extends StatelessWidget {
     final response = await http.get(Uri.parse(url));
 
     if (response.statusCode == 200) {
-      return json.decode(json.decode(response.body));
+      return json.decode(json.decode(json.decode(response.body)));
     } else {
       throw Exception('Failed to load investigation details');
     }
@@ -175,49 +176,6 @@ class IPD_InvestigationContent extends StatelessWidget {
                       }
                     },
                   ),
-
-
-                  // trailing: IconButton(
-                  //   icon: Icon(Icons.picture_as_pdf),
-                  //   color: Colors.red,
-                  //   onPressed: () {
-                  //     final pdfUrl = item['pdfpath'];
-                  //     if (pdfUrl != null && pdfUrl.isNotEmpty) {
-                  //       String servname = item['servname'] ?? '';
-                  //       if (servname.contains('Lipid Profile')) {
-                  //         // Navigate to PDF Viewer for Lipid Profile
-                  //         Navigator.push(
-                  //           context,
-                  //           MaterialPageRoute(builder: (context) => PdfViewerPage(pdfUrl: pdfUrl)),
-                  //         );
-                  //       } else if (servname.contains('CBC')) {
-                  //         // Navigate to PDF Viewer for CBC
-                  //         Navigator.push(
-                  //           context,
-                  //           MaterialPageRoute(builder: (context) => PdfViewerPage(pdfUrl: pdfUrl)),
-                  //         );
-                  //       } else if (servname.contains('TSH')) {
-                  //         // Navigate to PDF Viewer for TSH
-                  //         Navigator.push(
-                  //           context,
-                  //           MaterialPageRoute(builder: (context) => PdfViewerPage(pdfUrl: pdfUrl)),
-                  //         );
-                  //       } else {
-                  //         // Default action for other PDFs
-                  //         Navigator.push(
-                  //           context,
-                  //           MaterialPageRoute(builder: (context) => PdfViewerPage(pdfUrl: pdfUrl)),
-                  //         );
-                  //       }
-                  //     } else {
-                  //       // Handle case where pdfUrl is null or empty
-                  //       ScaffoldMessenger.of(context).showSnackBar(
-                  //         SnackBar(content: Text('No PDF available for this item.')),
-                  //       );
-                  //     }
-                  //   },
-                  // ),
-
 
 
                 ),
