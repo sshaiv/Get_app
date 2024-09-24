@@ -127,64 +127,77 @@ class InvestigationContent extends StatelessWidget {
         ),
         backgroundColor: Colors.blueGrey[100],
       ),
-      body: FutureBuilder<Map<String, dynamic>>(
-        future: fetchInvestigationDetails(visitId),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return Center(child: CircularProgressIndicator());
-          } else if (snapshot.hasError) {
-            return Center(child: Text('Error: ${snapshot.error}'));
-          } else if (!snapshot.hasData || snapshot.data == null) {
-            return Center(child: Text('No data available'));
-          }
 
-          final data = snapshot.data!;
-          List<dynamic> items = data['Table'] ?? [];
+    
+    body: FutureBuilder<Map<String, dynamic>>(
+  future: fetchInvestigationDetails(visitId),
+  builder: (context, snapshot) {
+    if (snapshot.connectionState == ConnectionState.waiting) {
+      return Center(child: CircularProgressIndicator());
+    } else if (snapshot.hasError) {
+      return Center(child: Text('Error: ${snapshot.error}'));
+    } else if (!snapshot.hasData || snapshot.data == null) {
+      return Center(child: Text('No data available'));
+    }
 
-          return ListView.builder(
-            padding: EdgeInsets.symmetric(vertical: 10, horizontal: 15),
-            itemCount: items.length,
-            itemBuilder: (context, index) {
-              final item = items[index];
-              return Card(
-                margin: EdgeInsets.symmetric(vertical: 8),
-                elevation: 4,
-                child: ListTile(
-                  contentPadding: EdgeInsets.all(16),
-                  title: Text(
-                    item['servname'] ?? 'No name',
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
-                    ),
-                  ),
-                  subtitle: Text(
-                    'Order Date: ${item['orddate'] ?? 'No date'}',
-                    style: TextStyle(
-                      color: Colors.grey[700],
-                      fontSize: 14,
-                    ),
-                  ),
-                  trailing: IconButton(
-                    icon: Icon(
-                      Icons.picture_as_pdf,
-                      color: Colors.red,
-                    ),
-                    onPressed: () {
-                      final pdfUrl = item['pdfpath'];
-                      if (pdfUrl != null && pdfUrl.isNotEmpty) {
-                        // Implement PDF URL action here
-                        // For example, use the `url_launcher` package to open the PDF
-                        // launch(pdfUrl);
-                      }
-                    },
-                  ),
-                ),
-              );
-            },
-          );
-        },
-      ),
+    final data = snapshot.data!;
+    List<dynamic> items = data['Table'] ?? [];
+    
+    // Debugging information
+    print('Data: $data');
+    print('Items length: ${items.length}');
+
+    return ListView.builder(
+      padding: EdgeInsets.symmetric(vertical: 10, horizontal: 15),
+      itemCount: items.length,
+      itemBuilder: (context, index) {
+        final item = items[index];
+        return Card(
+          margin: EdgeInsets.symmetric(vertical: 8),
+          elevation: 4,
+          child: ListTile(
+            contentPadding: EdgeInsets.all(16),
+            title: Text(
+              item['servname'] ?? 'No name',
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 16,
+              ),
+            ),
+            subtitle: Text(
+              'Order Date: ${item['orddate'] ?? 'No date'}',
+              style: TextStyle(
+                color: Colors.grey[700],
+                fontSize: 14,
+              ),
+            ),
+            trailing: IconButton(
+              icon: Icon(
+                Icons.picture_as_pdf,
+                color: Colors.red,
+              ),
+              onPressed: () {
+                final pdfUrl = item['pdfpath'];
+                if (pdfUrl != null && pdfUrl.isNotEmpty) {
+                  // Implement PDF URL action here
+                  // For example, use the `url_launcher` package to open the PDF
+                  // launch(pdfUrl);
+                } else {
+                  // Handle case where PDF URL is not available
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('PDF not available')),
+                  );
+                }
+              },
+            ),
+          ),
+        );
+      },
+    );
+  },
+),
+
+
     );
   }
 }
