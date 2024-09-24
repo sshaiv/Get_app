@@ -2,7 +2,6 @@ import 'package:doctor_app/HomePage.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-import 'package:doctor_app/DoctorPage/ICU_PatientsDetails.dart';
 import 'dart:ui';
 
 class Loginpage extends StatefulWidget {
@@ -16,7 +15,6 @@ class _LoginpageState extends State<Loginpage> {
   final _usernameController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _isLoading = false;
-  bool _isLoadingLocations = false;
   String? _selectedLocation;
 
   final List<String> _locations = [
@@ -30,7 +28,6 @@ class _LoginpageState extends State<Loginpage> {
   @override
   void initState() {
     super.initState();
-    // No need to fetch locations if hardcoded
   }
 
 
@@ -46,7 +43,7 @@ class _LoginpageState extends State<Loginpage> {
       final response = await http.get(
         Uri.parse(
             'https://doctorapi.medonext.com/api/UserCred/GetUserLogin?JsonOrg={"loginid":"$username","pwd":"$password"}'),
-      // 'https://doctorapi.medonext.com/api/UserCred/GetUserLogin?JsonOrg={"loginid":"ghrc","pwd":"ghrc123"}' ),
+
        );
       print('Username: $username');
       print('Password: $password');
@@ -65,7 +62,7 @@ class _LoginpageState extends State<Loginpage> {
             ),
           ),
         );
-        // Clear the text fields
+       
         _usernameController.clear();
         _passwordController.clear();
         setState(() {
@@ -79,18 +76,12 @@ class _LoginpageState extends State<Loginpage> {
           print('Username: $username');
           print('Token: $token');
           print('Location: $location');
-
-
         }
-        // else {
-        //   _showErrorDialog('Login failed. Please check your credentials.');
-        // }
-
       } else {
         _showErrorDialog('Failed to login with status code ${response.statusCode}');
       }
     } catch (e) {
-      print('Error: $e'); // Log the error
+      print('Error: $e'); 
       _showErrorDialog('Invalid Username or Password .');
     } finally {
       setState(() {
@@ -126,26 +117,24 @@ class _LoginpageState extends State<Loginpage> {
       body: Stack(
         fit: StackFit.expand,
         children: [
-          // Background Image
           Image.asset(
             'assets/images/background.png',
             fit: BoxFit.cover,
           ),
-          // Blur Effect
           BackdropFilter(
             filter: ImageFilter.blur(sigmaX: 10.0, sigmaY: 10.0),
             child: Container(
-              color: Colors.black.withOpacity(0.3), // Semi-transparent overlay
+              color: Colors.black.withOpacity(0.3), 
             ),
           ),
-          // Main Content
+          
           Padding(
             padding: const EdgeInsets.all(16.0),
             child: Center(
               child: Container(
-                color: Colors.white.withOpacity(0.2), // Light opacity background
-                height: 500, // Increased height to accommodate dropdown
-                constraints: BoxConstraints(maxWidth: 400),
+                color: Colors.white.withOpacity(0.2), 
+                height: 500, 
+                constraints: const BoxConstraints(maxWidth: 400),
                 padding: const EdgeInsets.all(24.0),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -180,7 +169,7 @@ class _LoginpageState extends State<Loginpage> {
                     const SizedBox(height: 16.0),
                     DropdownButtonFormField<String>(
                       value: _selectedLocation,
-                      hint: Text('Select Location'),
+                      hint: const Text('Select Location'),
                       onChanged: (String? newValue) {
                         setState(() {
                           _selectedLocation = newValue;
@@ -204,9 +193,9 @@ class _LoginpageState extends State<Loginpage> {
                         : ElevatedButton(
                       onPressed: _login,
                       style: ElevatedButton.styleFrom(
-                        padding: EdgeInsets.symmetric(horizontal: 40.0, vertical: 16.0),
+                        padding: const EdgeInsets.symmetric(horizontal: 40.0, vertical: 16.0),
                         backgroundColor: Colors.red[400],
-                        textStyle: TextStyle(fontSize: 18.0),
+                        textStyle: const TextStyle(fontSize: 18.0),
                       ),
                       child: const Text(
                         'Login',
@@ -216,20 +205,6 @@ class _LoginpageState extends State<Loginpage> {
                         ),
                       ),
                     ),
-
-                    // TextButton(
-                    //   onPressed: () {
-                    //     Navigator.push(
-                    //       context,
-                    //       MaterialPageRoute(
-                    //         builder: (context) => HomePage(
-                    //           username: _usernameController.text,
-                    //         ),
-                    //       ),
-                    //     );
-                    //   },
-                    //   child: const Text('Next'),
-                    // ),
                   ],
                 ),
               ),

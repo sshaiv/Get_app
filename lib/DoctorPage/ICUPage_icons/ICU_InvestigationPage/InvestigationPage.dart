@@ -18,12 +18,10 @@ class InvestigationPage extends StatefulWidget {
 
 class InvestigationPageState extends State<InvestigationPage> {
   int _currentIndex = 0;
-  late Future<Map<String, dynamic>> _investigationDetails;
 
   @override
   void initState() {
     super.initState();
-    _investigationDetails = fetchInvestigationDetails(widget.visitId);
   }
 
   Future<Map<String, dynamic>> fetchInvestigationDetails(String visitId) async {
@@ -49,7 +47,9 @@ class InvestigationPageState extends State<InvestigationPage> {
 
   @override
   Widget build(BuildContext context) {
-    final List<Widget> _widgetOptions = <Widget>[
+    final List<Widget> 
+    widgetOptions = <Widget>
+    [
       InvestigationContent(visitId: widget.visitId),
       VitalsPage(),
       MedicinePage(),
@@ -57,7 +57,7 @@ class InvestigationPageState extends State<InvestigationPage> {
     ];
 
     return Scaffold(
-      body: _widgetOptions.elementAt(_currentIndex),
+      body: widgetOptions.elementAt(_currentIndex),
       bottomNavigationBar: BottomNavigationBar(
         type: BottomNavigationBarType.fixed,
         currentIndex: _currentIndex,
@@ -123,7 +123,7 @@ class InvestigationContent extends StatelessWidget {
       appBar: AppBar(
         title: Text(
           'ICU Patient: $visitId',
-          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
         ),
         backgroundColor: Colors.blueGrey[100],
       ),
@@ -133,33 +133,33 @@ class InvestigationContent extends StatelessWidget {
   future: fetchInvestigationDetails(visitId),
   builder: (context, snapshot) {
     if (snapshot.connectionState == ConnectionState.waiting) {
-      return Center(child: CircularProgressIndicator());
+      return const Center(child: CircularProgressIndicator());
     } else if (snapshot.hasError) {
       return Center(child: Text('Error: ${snapshot.error}'));
     } else if (!snapshot.hasData || snapshot.data == null) {
-      return Center(child: Text('No data available'));
+      return const Center(child: Text('No data available'));
     }
 
     final data = snapshot.data!;
     List<dynamic> items = data['Table'] ?? [];
     
     // Debugging information
-    print('Data: $data');
-    print('Items length: ${items.length}');
+    // print('Data: $data');
+    // print('Items length: ${items.length}');
 
     return ListView.builder(
-      padding: EdgeInsets.symmetric(vertical: 10, horizontal: 15),
+      padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 15),
       itemCount: items.length,
       itemBuilder: (context, index) {
         final item = items[index];
         return Card(
-          margin: EdgeInsets.symmetric(vertical: 8),
+          margin: const EdgeInsets.symmetric(vertical: 8),
           elevation: 4,
           child: ListTile(
-            contentPadding: EdgeInsets.all(16),
+            contentPadding: const EdgeInsets.all(16),
             title: Text(
               item['servname'] ?? 'No name',
-              style: TextStyle(
+              style: const TextStyle(
                 fontWeight: FontWeight.bold,
                 fontSize: 16,
               ),
@@ -172,7 +172,7 @@ class InvestigationContent extends StatelessWidget {
               ),
             ),
             trailing: IconButton(
-              icon: Icon(
+              icon: const Icon(
                 Icons.picture_as_pdf,
                 color: Colors.red,
               ),
@@ -183,9 +183,9 @@ class InvestigationContent extends StatelessWidget {
                   // For example, use the `url_launcher` package to open the PDF
                   // launch(pdfUrl);
                 } else {
-                  // Handle case where PDF URL is not available
+                  
                   ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('PDF not available')),
+                    const SnackBar(content: Text('PDF not available')),
                   );
                 }
               },
@@ -195,10 +195,8 @@ class InvestigationContent extends StatelessWidget {
       },
     );
   },
-),
-
-
-    );
+  ),
+  );
   }
 }
 
