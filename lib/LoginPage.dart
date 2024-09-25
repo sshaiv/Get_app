@@ -30,65 +30,70 @@ class _LoginpageState extends State<Loginpage> {
     super.initState();
   }
 
+Future<void> _login() async {
+  final username = _usernameController.text;
+  final password = _passwordController.text;
+  final location = _selectedLocation ?? 'Not selected';
+  setState(() {
+    _isLoading = true;
+  });
 
-  Future<void> _login() async {
-    final username = _usernameController.text;
-    final password = _passwordController.text;
-    final location = _selectedLocation ?? 'Not selected';
-    setState(() {
-      _isLoading = true;
-    });
+  try {
+    final response = await http.get(
+      Uri.parse(
+          'https://doctorapi.medonext.com/api/UserCred/GetUserLogin?JsonOrg={"loginid":"$username","pwd":"$password"}'),
+    );
+    
+    print('Username: $username');
+    print('Password: $password');
+    print('Response status: ${response.statusCode}');
+    print('Response body: ${response.body}');
 
-    try {
-      final response = await http.get(
-        Uri.parse(
-            'https://doctorapi.medonext.com/api/UserCred/GetUserLogin?JsonOrg={"loginid":"$username","pwd":"$password"}'),
+    if (response.statusCode == 200) {
+      final data = jsonDecode(jsonDecode(response.body));
+      print('Response data: $data');
 
-       );
-      print('Username: $username');
-      print('Password: $password');
-      print('Response status: ${response.statusCode}');
-      print('Response body: ${response.body}');
-
-      if (response.statusCode == 200) {
-        final data = jsonDecode(jsonDecode(response.body));
-        print('Response data: $data');
-
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => HomePage(
-              username: username,
-            ),
+      // Assuming the empid is in the first item of the "Table" array
+      final empid = data['Table'][0]['empid'];
+      
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => HomePage(
+            username: username,
+            empid: empid, 
           ),
-        );
-       
-        _usernameController.clear();
-        _passwordController.clear();
-        setState(() {
-          _selectedLocation = null; 
-        });
+        ),
+      );
 
-        if (data['success'] == true) {
-          final token = data['token'];
-          print("Token :$token");
-
-          print('Username: $username');
-          print('Token: $token');
-          print('Location: $location');
-        }
-      } else {
-        _showErrorDialog('Failed to login with status code ${response.statusCode}');
-      }
-    } catch (e) {
-      print('Error: $e'); 
-      _showErrorDialog('Invalid Username or Password .');
-    } finally {
+      _usernameController.clear();
+      _passwordController.clear();
       setState(() {
-        _isLoading = false;
+        _selectedLocation = null; 
       });
+
+      if (data['success'] == true) {
+        final token = data['token'];
+        print("Token :$token");
+
+        print('Username: $username');
+        print('Token: $token');
+        print('Location: $location');
+        print('Emp ID: $empid'); 
+      }
+    } else {
+      _showErrorDialog('Failed to login with status code ${response.statusCode}');
     }
+  } catch (e) {
+    print('Error: $e'); 
+    _showErrorDialog('Invalid Username or Password.');
+  } finally {
+    setState(() {
+      _isLoading = false;
+    });
   }
+}
+
 
 
   void _showErrorDialog(String message) {
@@ -215,7 +220,6 @@ class _LoginpageState extends State<Loginpage> {
     );
   }
 }
-
 
 
 

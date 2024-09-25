@@ -9,40 +9,41 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:http/http.dart' as http;
 import 'ICUPage_icons/ICU_InvestigationPage/InvestigationPage.dart';
 
-void main() {
-  runApp(MyApp());
-}
-
-class MyApp extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      home: ICUPage(),
-    );
-  }
-}
-
 class ICUPage extends StatelessWidget {
+  final String empid;
+
+  const ICUPage({super.key, required this.empid});
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: ICUPatientList(username: 'exampleUser'),
+      body: ICUPatientList(empid: empid),
     );
   }
 }
 
 class ICUPatientList extends StatelessWidget {
-  final String username;
+  final String empid;
 
-  const ICUPatientList({super.key, required this.username});
+  const ICUPatientList({super.key, required this.empid});
 
   @override
   Widget build(BuildContext context) {
     return FutureBuilder<Map<String, dynamic>>(
-      future: fetchPatientData(),
+      future: fetchPatientData(empid),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return Center(child: CircularProgressIndicator());
+           return Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                CircularProgressIndicator(),
+                SizedBox(height: 16),
+                Text('Loading ICU patient data...'),
+              ],
+            ),
+          );
+       
         } else if (snapshot.hasError) {
           return Center(child: Text('Error: ${snapshot.error}'));
         } else if (!snapshot.hasData || snapshot.data!['Table'] == null || (snapshot.data!['Table'] as List).isEmpty) {
@@ -97,16 +98,6 @@ class ICUPatientList extends StatelessWidget {
                                   color: Colors.black54,
                                 ),
                               ),
-                              // Pass the gssuhid to the relevant page if needed
-                              // Text(
-                              //   'GSS UHID: ${patient.gssuhid}',
-                              //   overflow: TextOverflow.ellipsis,
-                              //   style: const TextStyle(
-                              //     fontSize: 14,
-                              //     fontWeight: FontWeight.w500,
-                              //     color: Colors.black54,
-                              //   ),
-                              // ),
                               const SizedBox(height: 4),
                               SingleChildScrollView(
                                 scrollDirection: Axis.horizontal,
@@ -179,9 +170,9 @@ class ICUPatientList extends StatelessWidget {
   }
 }
 
-Future<Map<String, dynamic>> fetchPatientData() async {
+Future<Map<String, dynamic>> fetchPatientData(String empid) async {
   final url = 'https://doctorapi.medonext.com/api/DoctorAPI/GetData?JsonAppInbox=${Uri.encodeComponent(json.encode({
-    "doctorid": "24",
+    "doctorid": empid,  
     "fromdate": "",
     "todate": "",
     "datafor": "ICU",
